@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zym.pss.cargo.mapper.StockWarningMapper">
+	<resultMap id="StockWarningRM" type="StockWarning">	
+			<!-- 库存信息 -->
+		<result property="repositoryNo" column="repository_no"/>
+		<result property="goodsNo" column="goods_no"/>
+		<result property="goodsName" column="goods_name"/>
+		<result property="goodsType" column="goods_type"/>
+		<result property="packingUnit" column="packing_unit"/>
+		<result property="amount" column="amount"/>
+			<!-- 上下限信息 -->
+		<result property="overUpperAmount" column="over_upper_amount"/>
+		<result property="overLowerAmount" column="over_lower_amount"/>
+	</resultMap>
+	
+		<!-- 查询	原材料上限	 预警信息列表 -->
+	<select id="findMU" parameterType="map" resultMap="StockWarningRM">
+		select s.* ,(s.amount - m.upper_amount) as over_upper_amount 
+		from stock s 
+		left join 
+		(
+		     select * from material_ull
+		) m
+		on m.repository_no = s.repository_no and m.material_no = s.goods_no
+		where s.tenant_id = #{tenantId} AND goods_type = '1' and amount &gt;= upper_amount
+	</select>
+	
+		<!-- 查询	原材料下限	 预警信息列表 -->
+	<select id="findML" parameterType="map" resultMap="StockWarningRM">
+		select s.* ,(s.amount-m.lower_amount) as over_lower_amount
+		from stock s 
+		left join 
+		(
+		     select * from material_ull
+		) m
+		on m.repository_no = s.repository_no and m.material_no = s.goods_no
+		where s.tenant_id = #{tenantId}  AND  goods_type = '1' and amount &lt;= lower_amount
+	</select>
+	
+		<!-- 查询	货物上限		预警信息列表 -->
+	<select id="findPU" parameterType="map" resultMap="StockWarningRM">
+		select s.* ,(s.amount - p.upper_amount) as over_upper_amount 
+		from stock s 
+		left join 
+		(
+		     select * from material_ull
+		) p
+		on p.repository_no = s.repository_no and p.product_no = s.goods_no
+		where s.tenant_id = #{tenantId}  AND  goods_type = '2' and amount &gt;= upper_amount
+	</select>
+	
+		<!-- 查询	货物下限		预警信息列表 -->
+	<select id="findPL" parameterType="map" resultMap="StockWarningRM">
+		select s.* , (s.amount-p.lower_amount) as over_lower_amount
+		from stock s 
+		left join 
+		(
+		     select * from material_ull
+		) p
+		on p.repository_no = s.repository_no and p.product_no = s.goods_no
+		where s.tenant_id = #{tenantId}  AND  goods_type = '2' and amount &lt;= lower_amount
+	</select>
+</mapper>

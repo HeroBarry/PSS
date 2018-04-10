@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zym.pss.baseinfo.mapper.MaterialMapper">
+	<resultMap id="MaterialRM" type="Material">
+		<id property="id" column="id"/>
+		
+		<result property="materialNo" column="material_no"/>
+		<result property="name" column="name"/>
+		<result property="specification" column="specification"/>
+		<result property="packingUnit" column="packing_unit"/>
+		<result property="price" column="price"/>
+		<result property="memo" column="memo"/>
+		<result property="tenantId" column="tenant_id"/>
+	</resultMap>
+	
+	<!-- 查询列表 -->
+	<select id="find" parameterType="map" resultMap="MaterialRM">
+		select * from material
+		<where>
+			tenant_id = #{tenantId}
+			<if test="materialNo != null"> AND material_no = #{materialNo} </if>
+		</where>
+	</select>
+	<!-- 获取单个信息 -->
+	<select id="get" parameterType="string" resultMap="MaterialRM">
+		select * from material 
+		where id = #{pid}
+	</select>
+	<!-- 添加仓库信息 -->
+	<insert id="insert" parameterType="Material">
+		insert into material 
+		( id,material_no,name,specification,packing_unit,price,memo,tenant_id)
+		values
+		(
+			#{id , jdbcType = VARCHAR},
+			#{materialNo , jdbcType = VARCHAR},
+			#{name , jdbcType = VARCHAR},
+			#{specification , jdbcType = VARCHAR},
+			#{packingUnit , jdbcType = VARCHAR},
+			#{price , jdbcType = DOUBLE},
+			#{memo , jdbcType = VARCHAR},
+			#{tenantId , jdbcType = VARCHAR}
+		)
+	</insert>
+	<!-- 修改仓库信息 -->
+	<update id="update" parameterType="Material">
+		update material
+		<set>
+			<if test="materialNo != null"> material_no = #{materialNo},</if>
+			<if test="name != null"> name = #{name},</if>
+			<if test="specification != null">specification = #{specification},</if>
+			<if test="packingUnit != null">packing_unit = #{packingUnit},</if>
+			<if test="price != null">price = #{price},</if>
+			<if test="memo != null">memo = #{memo},</if>
+		</set>
+		where MATERIAL_ID = #{id}
+	</update>
+	<!-- 删除单个仓库信息 -->
+	<delete id="deleteById" parameterType="string">
+		delete from material 
+		where id = #{pid}
+	</delete>
+		<!-- 批量删除仓库信息 -->
+	<delete id="delete" parameterType="string">
+		delete from material 
+		where id in
+		<foreach collection="array" item="id" open="(" close=")" separator=",">
+			#{id}
+		</foreach>
+	</delete>
+</mapper>

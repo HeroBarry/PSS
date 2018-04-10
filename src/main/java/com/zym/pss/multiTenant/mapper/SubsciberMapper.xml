@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zym.pss.multiTenant.mapper.SubsciberMapper">
+	<resultMap id="SubsciberRM" type="Subsciber">
+		<id property="id" column="id"/>
+		
+		<!-- 冗余字段 -->
+		<result property="tenantId" column="tenant_id"/>
+		<result property="functionId" column="function_id"/>
+		
+		<result property="beginDate" column="begin_date"/>
+		<result property="endDate" column="end_date"/>
+		<result property="supsciberDate" column="subsciber_date"/>
+		<result property="remainder" column="remainder"/>
+	</resultMap>
+	
+	<!-- 订购服务VORM -->
+	<resultMap id="SubsciberVORM" type="SubsciberVo" extends="SubsciberRM">
+		<!-- 租户 -->
+		<association property="tenant" javaType="Tenant">
+			<id property="id" column="tenant_id"/>
+			
+			<result property="tenantNo" column="tenant_no"/>
+			<result property="password" column="password"/>
+			<result property="name" column="name"/>
+			<result property="company" column="company"/>
+			<result property="contactor" column="contactor"/>
+			<result property="address" column="address"/>
+			<result property="telephone" column="telephone"/>
+			<result property="state" column="state"/>
+		</association>	
+		<!-- 服务功能模块 -->
+		<association property="function" javaType="FunctionVO">
+			<id property="id" column="function_id"/>
+			
+			<result property="functionNo" column="function_no"/>
+			<result property="functionURL" column="function_url"/>
+			<result property="functionName" column="function_name"/>
+			<result property="description" column="description"/>
+			
+			<!-- 价格策略 -->
+			<association property="pricePolicy" javaType="PricePolicy">
+				<id property="id" column="id"/>
+				<result property="pricepolicyNo" column="pricepolicy_no"/>
+				
+				<result property="functionNo" column="function_no"/>
+				<result property="functionName" column="function_name"/>
+				
+				<result property="unit" column="unit"/>
+				<result property="price" column="price"/>
+			</association>
+		</association>	
+	</resultMap>
+	
+	
+	<!-- 查询列表 -->
+	<select id="find" parameterType="map" resultMap="SubsciberRM">
+		select * from subsciber
+	</select>
+	
+	<select id="findVO" parameterType="map" resultMap="SubsciberVORM">
+		select s.subsciber_id,s.tenant_id,s.function_id,s.begin_date,s.end_date,s.subsciber_date, months_between(s.end_date,sysdate) remainder,t.*,f.*
+	      from subsciber s 
+	      left join 
+	      (
+	           select * from tenant
+	      ) t 
+	      on s.tenant_id = t.tenant_id
+	      left join
+	      (
+	             select function_id,f.function_no function_no,f.function_name function_name,function_url,description,p.pricepolicy_id pricepolicy_id ,p.pricepolicy_no pricepolicy_no,
+	            p.unit unit , p.price price
+	            from function f
+	            left join
+	            (
+	                 select * 
+	                 from price_policy
+	            ) p
+	            on f.function_no = p.function_no
+	      ) f
+	      on s.function_id = f.function_id
+	    <where>
+			<if test="tenantId != null">s.tenant_id = #{tenantId}</if>
+		</where>
+	</select>
+	
+	<!-- 获取单个信息 -->
+	<select id="get" parameterType="string" resultMap="SubsciberRM">
+		select * from subsciber 
+		where id = #{pid}
+	</select>
+	<!-- 添加信息 -->
+	<insert id="insert" parameterType="Subsciber">
+		insert into subsciber 
+		(id,tenant_id,function_id,begin_date,end_date,subsciber_date,remainder)
+		values
+		(
+			#{id , jdbcType = VARCHAR},
+			#{tenantId , jdbcType = VARCHAR},
+			#{functionId , jdbcType = VARCHAR},
+			#{beginDate , jdbcType = TIMESTAMP},
+			#{endDate , jdbcType = TIMESTAMP},
+			#{supsciberDate , jdbcType = TIMESTAMP},
+			#{remainder , jdbcType = INTEGER}
+		)
+	</insert>
+	<!-- 修改信息 -->
+	<update id="update" parameterType="Subsciber">
+		update subsciber
+		<set>
+			<if test="tenantId != null"> tenant_id = #{tenantId},</if>
+			<if test="functionId != null"> function_id = #{functionId},</if>
+			<if test="beginDate != null"> begin_date = #{beginDate},</if>
+			<if test="endDate != null"> end_date = #{endDate},</if>
+			<if test="supsciberDate != null"> subsciber_date = #{supsciberDate},</if>
+			<if test="remainder != null"> remainder = #{remainder},</if>
+		</set>
+		where SUBSCIBER_ID = #{id}
+	</update>
+	<!-- 删除单个信息 -->
+	<delete id="deleteById" parameterType="string">
+		delete from subsciber 
+		where id = #{pid}
+	</delete>
+		<!-- 批量删除信息 -->
+	<delete id="delete" parameterType="string">
+		delete from subsciber 
+		where id in
+		<foreach collection="array" item="id" open="(" close=")" separator=",">
+			#{id}
+		</foreach>
+	</delete>
+</mapper>

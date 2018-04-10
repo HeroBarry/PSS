@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zym.pss.sysadmin.mapper.FunctionMapper">
+	<resultMap id="FunctionRM" type="Function">
+		 <id property="id" column="id"/>
+		
+		<result property="functionNo" column="function_no"/>
+		<result property="functionURL" column="function_url"/>
+		<result property="functionName" column="function_name"/>
+		<result property="description" column="description"/>
+	</resultMap>
+	
+	<!-- VO类ResultMap -->
+	<resultMap id="FunctionVORM" type="FunctionVO" extends="FunctionRM">
+		<association property="pricePolicy" javaType="PricePolicy">
+			<id property="id" column="id"/>
+			<result property="pricepolicyNo" column="pricepolicy_no"/>
+			
+			<result property="functionNo" column="function_no"/>
+			<result property="functionName" column="function_name"/>
+			
+			<result property="unit" column="unit"/>
+			<result property="price" column="price"/>
+		</association>
+	</resultMap>
+	
+	<!-- 查询列表 -->
+	<select id="find" parameterType="map" resultMap="FunctionRM">
+		select * from function
+	</select>
+	
+	<!-- 查询VO -->
+	<select id="findVO" parameterType="map" resultMap="FunctionVORM">
+		select *
+		from function f
+		left join
+		(
+		     select * from price_policy
+		) p
+		on f.function_no = p.function_no
+	</select>
+	
+	<!-- 分页查询 -->
+	<select id="findPage" parameterType="map" resultMap="FunctionRM">
+		select * from function
+	</select>
+	
+	<!-- 获取单个信息 -->
+	<select id="get" parameterType="string" resultMap="FunctionRM">
+		select * from function 
+		where id = #{pid}
+	</select>
+	<!-- 添加信息 -->
+	<insert id="insert" parameterType="Function">
+		insert into function 
+		(id,function_no,function_url,function_name,description)
+		values
+		(
+			#{id , jdbcType = VARCHAR},
+			#{functionNo , jdbcType = VARCHAR},
+			#{functionURL , jdbcType = VARCHAR},
+			#{functionName , jdbcType = VARCHAR},
+			#{description , jdbcType = VARCHAR}
+		)
+	</insert>
+	<!-- 修改信息 -->
+	<update id="update" parameterType="Function">
+		update function
+		<set>
+			<if test="functionNo != null"> function_no = #{functionNo},</if>
+			<if test="functionURL != null"> function_url = #{functionURL},</if>
+			<if test="functionName != null"> function_name = #{functionName},</if>
+			<if test="description != null">description = #{description},</if>
+		</set>
+		where id = #{id}
+	</update>
+	<!-- 删除单个-->
+	<delete id="deleteById" parameterType="string">
+		delete from function 
+		where id = #{pid}
+	</delete>
+		<!-- 批量删除 -->
+	<delete id="delete" parameterType="string">
+		delete from function 
+		where id in
+		<foreach collection="array" item="id" open="(" close=")" separator=",">
+			#{id}
+		</foreach>
+	</delete>
+</mapper>

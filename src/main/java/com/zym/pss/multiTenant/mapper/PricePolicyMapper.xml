@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zym.pss.multiTenant.mapper.PricePolicyMapper">
+	<resultMap id="PricePolicyRM" type="PricePolicy">
+		<id property="id" column="id"/>
+		<result property="pricepolicyNo" column="pricepolicy_no"/>
+		
+		<!-- 冗余字段 -->
+		<result property="functionNo" column="function_no"/>
+		<result property="functionName" column="function_name"/>
+		
+		<result property="unit" column="unit"/>
+		<result property="price" column="price"/>
+	</resultMap>
+	
+	<!-- 查询列表 -->
+	<select id="find" parameterType="map" resultMap="PricePolicyRM">
+		select * from pricepolicy
+	</select>
+	<!-- 获取单个信息 -->
+	<select id="get" parameterType="string" resultMap="PricePolicyRM">
+		select * from pricepolicy 
+		where id = #{pid}
+	</select>
+	<!-- 添加信息 -->
+	<insert id="insert" parameterType="PricePolicy">
+		insert into pricepolicy 
+		(id,pricepolicy_no,function_no,function_name,unit,price)
+		values
+		(
+			#{id , jdbcType = VARCHAR},
+			#{pricepolicyNo , jdbcType = VARCHAR},
+			#{functionNo , jdbcType = VARCHAR},
+			#{functionName , jdbcType = VARCHAR},
+			#{unit , jdbcType = VARCHAR},
+			#{price , jdbcType = DOUBLE}
+		)
+	</insert>
+	<!-- 修改信息 -->
+	<update id="update" parameterType="PricePolicy">
+		update pricepolicy
+		<set>
+			<if test="pricepolicyNo != null"> pricepolicy_no = #{pricepolicyNo},</if>
+			<if test="functionNo != null"> function_no = #{functionNo},</if>
+			<if test="functionName != null"> function_name = #{functionName},</if>
+			<if test="unit != null"> unit = #{unit},</if>
+			<if test="price != null"> price = #{price},</if>
+		</set>
+		where id = #{id}
+	</update>
+	<!-- 删除单个信息 -->
+	<delete id="deleteById" parameterType="string">
+		delete from pricepolicy 
+		where id = #{pid}
+	</delete>
+		<!-- 批量删除信息 -->
+	<delete id="delete" parameterType="string">
+		delete from pricepolicy 
+		where id in
+		<foreach collection="array" item="id" open="(" close=")" separator=",">
+			#{id}
+		</foreach>
+	</delete>
+</mapper>

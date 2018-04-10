@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zym.pss.baseinfo.mapper.MaterialULLMapper">
+	<resultMap id="MaterialULLRM" type="MaterialULL">
+	
+		<id property="id" column="id"/>
+		
+		<!-- 对应外键表关系用-->
+		<result property="repositoryNo" column="repository_no"/>
+		<result property="materialNo" column="material_no"/>
+		<result property="materialName" column="material_name"/>
+		
+		<result property="upperAmount" column="upper_amount"/>
+		<result property="lowerAmount" column="lower_amount"/>
+		<result property="bestAmount" column="best_amount"/>
+		<result property="packingUnit" column="packing_unit"/>
+		<result property="memo" column="memo"/>
+		<result property="tenantId" column="tenant_id"/>
+	</resultMap>
+	
+	<!-- 查询列表 -->
+	<select id="find" parameterType="map" resultMap="MaterialULLRM">
+		select * from material_ull
+		<where>
+			tenant_id = #{tenantId}
+		</where>
+	</select>
+	
+		<!-- 分页查询 -->
+	<select id="findPage" resultMap="MaterialULLRM">
+		select * from material_ull
+	</select>
+	
+	<!-- 获取单个 -->
+	<select id="get" parameterType="string" resultMap="MaterialULLRM">
+		select * from material_ull 
+		where id = #{pid}
+	</select>
+	
+	<!-- 添加 -->
+	<insert id="insert" parameterType="MaterialULL">
+		insert into material_ull 
+		(id,repository_no,material_no,material_name,upper_amount,lower_amount,best_amount,packing_unit,memo,tenant_id)
+		values
+		(
+			#{id , jdbcType = VARCHAR},
+			#{repositoryNo , jdbcType = VARCHAR},
+			#{materialNo , jdbcType = VARCHAR},
+			#{materialName , jdbcType = VARCHAR},
+			#{upperAmount , jdbcType = DOUBLE},
+			#{lowerAmount , jdbcType = DOUBLE},
+			#{bestAmount , jdbcType = DOUBLE},
+			#{packingUnit , jdbcType = VARCHAR},
+			#{memo , jdbcType = VARCHAR},
+			#{tenantId , jdbcType = VARCHAR}
+		)
+	</insert>
+	<!-- 修改 -->
+	<update id="update" parameterType="MaterialULL">
+		update material_ull
+		<set>
+			<if test="repositoryNo != null">repository_no = #{repositoryNo},</if>
+			<if test="materialNo != null">material_no = #{materialNo},</if>
+			<if test="materialName != null">material_name = #{materialName},</if>
+			
+			<if test="upperAmount != null">upper_amount = #{upperAmount},</if>
+			<if test="lowerAmount != null">lower_amount = #{lowerAmount},</if>
+			<if test="bestAmount != null">best_amount = #{bestAmount},</if>
+			<if test="packingUnit != null">packing_unit = #{packingUnit},</if>
+			<if test="memo != null">memo = #{memo},</if>
+		</set>
+		where id = #{id}
+	</update>
+	<!-- 删除单个 -->
+	<delete id="deleteById" parameterType="string">
+		delete from material_ull 
+		where id = #{pid}
+	</delete>
+		<!-- 批量删除 -->
+	<delete id="delete" parameterType="string">
+		delete from material_ull 
+		where id in
+		<foreach collection="array" item="id" open="(" close=")" separator=",">
+			#{id}
+		</foreach>
+	</delete>
+</mapper>

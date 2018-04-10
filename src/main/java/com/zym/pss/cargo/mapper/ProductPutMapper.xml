@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zym.pss.cargo.mapper.ProductPutMapper">
+	<resultMap id="ProductPutRM" type="ProductPut">
+		<id property="id" column="id"/>
+		
+		<!-- 冗余外键 -->
+		<result property="productNo" column="product_no"/>
+		<result property="productName" column="product_name"/>
+		<result property="productAmount" column="product_amount"/>
+		<result property="packingUnit" column="packing_unit"/>
+		<result property="operator" column="operator"/>
+		<!-- 冗余外键 -->
+		<result property="repositoryNo" column="repository_no"/>
+		<result property="putTime" column="put_time"/>
+		<result property="state" column="state"/>
+		<result property="memo" column="memo"/>
+		<result property="tenantId" column="tenant_id"/>
+	</resultMap>
+	
+	<!-- 查询列表 -->
+	<select id="find" parameterType="map" resultMap="ProductPutRM">
+		select * from product_put
+		<where>
+			tenant_id = #{tenantId}
+		</where>
+	</select>
+	
+	<!-- 分页查询 -->
+	<select id="findPage" resultMap="ProductPutRM">
+		select * from product_put
+	</select>
+	
+	<!-- 获取单个 -->
+	<select id="get" parameterType="string" resultMap="ProductPutRM">
+		select * from product_put 
+		where id = #{pid}
+	</select>
+	
+	<!-- 添加 -->
+	<insert id="insert" parameterType="ProductPut">
+		insert into product_put 
+		(id,product_no,product_name,product_amount,packing_unit,operator,repository_no,put_time,state,memo,tenant_id)
+		values
+		(
+			#{id , jdbcType = VARCHAR},
+			#{productNo , jdbcType = VARCHAR},
+			#{productName , jdbcType = VARCHAR},
+			#{productAmount , jdbcType = DOUBLE},
+			#{packingUnit , jdbcType = VARCHAR},
+			#{operator , jdbcType = VARCHAR},
+			#{repositoryNo , jdbcType = VARCHAR},
+			#{putTime , jdbcType = TIMESTAMP},
+			#{state, jdbcType = INTEGER},
+			#{memo , jdbcType = VARCHAR},
+			#{tenantId , jdbcType = VARCHAR}
+		)
+	</insert>
+	<!-- 修改 -->
+	<update id="update" parameterType="ProductPut">
+		update product_put
+		<set>
+			<if test="productNo != null">product_no = #{productNo},</if>
+			<if test="productName != null">product_name = #{productName},</if>
+			<if test="productAmount != null">product_amount = #{productAmount},</if>
+			<if test="packingUnit != null">packing_unit = #{packingUnit},</if>
+			<if test="operator != null">operator = #{operator},</if>
+			<if test="repositoryNo != null">repository_no = #{repositoryNo},</if>
+			<if test="putTime != null">put_time = #{putTime},</if>
+			<if test="state != null">state = #{state},</if>
+			<if test="memo != null">memo = #{memo},</if>
+		</set>
+		where id = #{id}
+	</update>
+	<!-- 删除单个 -->
+	<delete id="deleteById" parameterType="string">
+		delete from product_put 
+		where id = #{pid}
+	</delete>
+		<!-- 批量删除 -->
+	<delete id="delete" parameterType="string">
+		delete from product_put 
+		where id in
+		<foreach collection="array" item="id" open="(" close=")" separator=",">
+			#{id}
+		</foreach>
+	</delete>
+		<!-- 更新状态 -->
+	<update id="updateState" parameterType="map">
+		update product_put
+		set state = ${state}
+		where id in
+		<foreach collection="ids" item="id" open="(" close=")" separator=",">
+			#{id}		
+		</foreach>
+	</update>
+</mapper>

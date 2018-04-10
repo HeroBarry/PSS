@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zym.pss.sysadmin.mapper.UserMapper">
+	<resultMap id="UserRM" type="User">
+		<id property="id" column="id"/>
+		
+		<result property="userNo" column="user_no"/>
+		<result property="password" column="password"/>
+		<result property="telephone" column="telephone"/>
+		<result property="email" column="email"/>
+		<result property="address" column="address"/>
+		<result property="status" column="status"/>
+		<result property="tenantId" column="tenant_id"/>
+	</resultMap>
+	
+	<!-- 用户角色VO类 -->
+	<resultMap id="UserRolesVoRM" type="UserRolesVo">
+		<result property="userId" column="USER_ID"/>
+		<result property="userNo" column="USER_NO"/>
+		<result property="userRoleId" column="USER_ROLE_ID"/>
+		<result property="roleId" column="ROLE_ID"/>
+		<result property="roleName" column="NAME"/>
+	</resultMap>
+	
+	<!-- 用户VO类 -->
+	<resultMap id="UserVoRM" type="UserVo" extends="UserRM">
+	
+		<!-- 用户角色List -->
+		<collection property="userRoles" javaType="list" ofType="RoleVo">
+			<id property="id" column="ROLE_ID"/>
+		
+			<result property="roleNo" column="ROLE_NO"/>
+			<result property="name" column="NAME"/>
+			<result property="description" column="DESCRIPTION"/>
+			
+			<!-- 角色权限List -->
+			<collection property="roleFuncs" javaType="list" ofType="Function">
+				<id property="id" column="FUNCTION_ID"/>
+		
+				<result property="functionNo" column="Function_NO"/>
+				<result property="functionURL" column="FUNCTION_URL"/>
+				<result property="functionName" column="FUNCTION_NAME"/>
+			</collection>
+					
+		</collection>
+	</resultMap>
+	
+	<!-- 查询列表 -->
+	<select id="find" parameterType="map" resultMap="UserRM">
+		select * from user 
+		<where>
+			<if test="tenantId != null">tenant_id = #{tenantId}</if>		
+		</where>
+	</select>
+	
+	<!-- 获取单个信息 -->
+	<select id="get" parameterType="string" resultMap="UserRM">
+		select * from user 
+		where USER_ID = #{pid}	
+	</select>
+	
+	<!-- 查询User vo 类 -->
+	<select id="findByUserNameAndPass" parameterType="map" resultMap="UserVoRM">
+		select u.* , b.role_id role_id , b.role_no role_no , b.name name, b.description description ,b.function_id , b.function_no,
+           b.function_url,b.function_name
+	    from user u
+	    left join
+	    (
+	        select a.user_id user_id, r.role_id role_id , r.role_no role_no , r.name name , r.description description ,r.function_id function_id,
+	        r.function_no function_no , r.function_url function_url , r.function_name function_name
+	        from user_role a
+	        left join
+	        (
+	            select r.* , f.function_id function_id ,f.function_no function_no , f.function_url function_url , f.function_name function_name
+	            from role r
+	            left join
+	            (
+	                 select * 
+	                 from role_function
+	            )rf
+	            on r.role_id = rf.role_id
+	            left join 
+	            (
+	                 select * 
+	                 from function
+	            )f 
+	            on rf.function_id = f.function_id
+	        )r
+	        on a.role_id = r.role_id
+	    )b
+	    on u.user_id = b.user_id
+		where u.tenant_id = #{tenantId} AND u.user_no = #{userName} and u.password = #{password}
+	</select>
+		
+	<!-- 查询用户角色 -->
+	<select id="findRoles" parameterType="map" resultMap="UserRolesVoRM">
+		select u.user_id user_id , u.user_no user_no,x.user_role_id user_role_id ,x.role_id role_id ,x.name name 
+		from user u
+		left join 
+		(
+		     select ur.user_id user_id,ur.user_role_id user_role_id , r.role_id role_id , r.name name 
+		     from user_role ur
+		     left join
+		     (
+		          select *
+		          from role
+		     ) r
+		     on ur.role_id =r.role_id
+		) x
+		on x.user_id = u.user_id
+		where u.user_id = #{userId}	
+	</select>
+	
+	<!-- 添加信息 -->
+	<insert id="insert" parameterType="User">
+		insert into user 
+		(id,user_no,password,telephone,email,address,status,tenant_id)
+		values
+		(
+			#{id , jdbcType = VARCHAR},
+			#{userNo , jdbcType = VARCHAR},
+			#{password , jdbcType = VARCHAR},
+			#{telephone , jdbcType = VARCHAR},
+			#{email , jdbcType = VARCHAR},
+			#{address , jdbcType = VARCHAR},
+			#{status , jdbcType = INTEGER},
+			#{tenantId , jdbcType = VARCHAR}
+		)
+	</insert>
+	<!-- 修改信息 -->
+	<update id="update" parameterType="User">
+		update user
+		<set>
+			<if test="userNo != null"> user_no = #{userNo},</if>
+			<if test="password != null"> password = #{password},</if>
+			<if test="telephone != null">telephone = #{telephone},</if>
+			<if test="email != null">email = #{email},</if>
+			<if test="address != null">address = #{address},</if>
+			<if test="status != null">status = #{status},</if>
+			<if test="tenantId != null">tenant_id = #{tenantId},</if>
+		</set>
+		where id = #{id}
+	</update>
+	<!-- 删除单个-->
+	<delete id="deleteById" parameterType="string">
+		delete from user 
+		where id = #{pid}
+	</delete>
+		<!-- 批量删除 -->
+	<delete id="delete" parameterType="string">
+		delete from user 
+		where id in
+		<foreach collection="array" item="id" open="(" close=")" separator=",">
+			#{id}
+		</foreach>
+	</delete>
+</mapper>

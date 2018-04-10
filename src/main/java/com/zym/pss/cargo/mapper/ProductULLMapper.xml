@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zym.pss.baseinfo.mapper.ProductULLMapper">
+	<resultMap id="ProductULLRM" type="ProductULL">
+		<id property="id" column="id"/>
+		
+		<!-- 对应外键表关系用-->
+		<result property="repositoryNo" column="repository_no"/>
+		<result property="productNo" column="product_no"/>
+		<result property="productName" column="product_name"/>
+		
+		<result property="upperAmount" column="upper_amount"/>
+		<result property="lowerAmount" column="lower_amount"/>
+		<result property="bestAmount" column="best_amount"/>
+		<result property="packingUnit" column="packing_unit"/>
+		<result property="memo" column="memo"/>
+		<result property="tenantId" column="tenant_id"/>
+	</resultMap>
+	
+	<!-- 查询列表 -->
+	<select id="find" parameterType="map" resultMap="ProductULLRM">
+		select * from product_ull
+		<where>
+			tenant_id = #{tenantId}
+		</where>
+	</select>
+	
+	<!-- 分页查询 -->
+	<select id="findPage" resultMap="ProductULLRM">
+		select * from product_ull
+	</select>
+	
+	<!-- 获取单个 -->
+	<select id="get" parameterType="string" resultMap="ProductULLRM">
+		select * from product_ull 
+		where id = #{pid}
+	</select>
+	
+	<!-- 添加 -->
+	<insert id="insert" parameterType="ProductULL">
+		insert into product_ull 
+		(id,repository_no,product_no,product_name,upper_amount,lower_amount,best_amount,packing_unit,memo,tenant_id)
+		values
+		(
+			#{id , jdbcType = VARCHAR},
+			#{repositoryNo , jdbcType = VARCHAR},
+			#{productNo , jdbcType = VARCHAR},
+			#{productName , jdbcType = VARCHAR},
+			#{upperAmount , jdbcType = DOUBLE},
+			#{lowerAmount , jdbcType = DOUBLE},
+			#{bestAmount , jdbcType = DOUBLE},
+			#{packingUnit , jdbcType = VARCHAR},
+			#{memo , jdbcType = VARCHAR},
+			#{tenantId , jdbcType = VARCHAR}
+		)
+	</insert>
+	<!-- 修改 -->
+	<update id="update" parameterType="ProductULL">
+		update product_ull
+		<set>
+			<if test="repositoryNo != null">repository_no = #{repositoryNo},</if>
+			<if test="productNo != null">product_no = #{productNo},</if>
+			<if test="productName != null">product_name = #{productName},</if>
+			
+			<if test="upperAmount != null">upper_amount = #{upperAmount},</if>
+			<if test="lowerAmount != null">lower_amount = #{lowerAmount},</if>
+			<if test="bestAmount != null">best_amount = #{bestAmount},</if>
+			<if test="packingUnit != null">packing_unit = #{packingUnit},</if>
+			<if test="memo != null">memo = #{memo},</if>
+		</set>
+		where id = #{id}
+	</update>
+	<!-- 删除单个 -->
+	<delete id="deleteById" parameterType="string">
+		delete from product_ull 
+		where id = #{pid}
+	</delete>
+		<!-- 批量删除 -->
+	<delete id="delete" parameterType="string">
+		delete from product_ull 
+		where id in
+		<foreach collection="array" item="id" open="(" close=")" separator=",">
+			#{id}
+		</foreach>
+	</delete>
+</mapper>

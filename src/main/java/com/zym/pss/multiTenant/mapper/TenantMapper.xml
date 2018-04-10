@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zym.pss.multiTenant.mapper.TenantMapper">
+	<resultMap id="TenantRM" type="Tenant">
+		<id property="id" column="id"/>
+		
+		<result property="tenantNo" column="tenant_no"/>
+		<result property="password" column="password"/>
+		<result property="name" column="name"/>
+		<result property="company" column="company"/>
+		<result property="contactor" column="contactor"/>
+		<result property="address" column="address"/>
+		<result property="telephone" column="telephone"/>
+		<result property="state" column="state"/>
+	</resultMap>
+	
+	<!-- 查询列表 -->
+	<select id="find" parameterType="map" resultMap="TenantRM">
+		select * from tenant
+		<where>
+			<if test="tenantNo != null">tenant_no = #{tenantNo}</if>	
+			<if test="password != null">AND password = #{password}</if>	
+		</where>
+	</select>
+	<!-- 获取单个信息 -->
+	<select id="get" parameterType="string" resultMap="TenantRM">
+		select * from tenant 
+		where id = #{pid}
+	</select>
+	
+	<select id="findByTenantNo" parameterType="string" resultMap="TenantRM">
+		select * from tenant
+		where tenant_no = #{tenantNo}
+	</select>
+	
+	<!-- 添加信息 -->
+	<insert id="insert" parameterType="Tenant">
+		insert into tenant 
+		(id,tenant_no,password,name,company,contactor,address,telephone,state)
+		values
+		(
+			#{id , jdbcType = VARCHAR},
+			#{tenantNo , jdbcType = VARCHAR},
+			#{password , jdbcType = VARCHAR},
+			#{name , jdbcType = VARCHAR},
+			#{company , jdbcType = VARCHAR},
+			#{contactor , jdbcType = VARCHAR},
+			#{address , jdbcType = VARCHAR},
+			#{telephone , jdbcType = VARCHAR},
+			#{state , jdbcType = INTEGER}
+		)
+	</insert>
+	<!-- 修改信息 -->
+	<update id="update" parameterType="Tenant">
+		update tenant
+		<set>
+			<if test="tenantNo != null"> tenant_no = #{tenantNo},</if>
+			<if test="password != null"> password = #{password},</if>
+			<if test="name != null"> name = #{name},</if>
+			<if test="company != null"> company = #{company},</if>
+			<if test="contactor != null">contactor = #{contactor},</if>
+			<if test="address != null">address = #{address},</if>
+			<if test="telephone != null">telephone = #{TELEPHONE},</if>
+			<if test="state != null">state = #{state},</if>
+		</set>
+		where id = #{id}
+	</update>
+	<!-- 删除单个信息 -->
+	<delete id="deleteById" parameterType="string">
+		delete from tenant 
+		where id = #{pid}
+	</delete>
+		<!-- 批量删除信息 -->
+	<delete id="delete" parameterType="string">
+		delete from tenant 
+		where id in
+		<foreach collection="array" item="id" open="(" close=")" separator=",">
+			#{id}
+		</foreach>
+	</delete>
+	<!-- 批量更新 -->
+	<update id="updateState" parameterType="map">
+		update tenant
+		set state = ${state}
+		where id in
+		<foreach collection="ids" item="id" open="(" close=")" separator=",">
+			#{id}		
+		</foreach>
+	</update>
+</mapper>
